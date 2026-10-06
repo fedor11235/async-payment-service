@@ -20,19 +20,19 @@
 ## Архитектура
 
 ```
-        POST /payments                          ┌───────────────┐
+        POST /payments                            ┌───────────────┐
  client ───────────────▶ API ──┐  одна транзакция │  PostgreSQL   │
                                ├─────────────────▶│ payments +    │
                                │                  │ outbox        │
                                │                  └───────────────┘
-                               │                         ▲
-                     ┌─────────┴─────────┐               │ UPDATE status,
+                               │                          ▲
+                     ┌─────────┴──────────┐               │ UPDATE status,
                      │  outbox relay      │ polling       │ webhook_delivered
                      │ (фоновая задача)   │───────────────┘
                      └─────────┬──────────┘
                                │ publish
                                ▼
-                       [ payments.new ] ◀───────────────┐ dead-letter
+                       [ payments.new ] ◀─────────────────┐ dead-letter
                                │                          │ по истечении TTL
                                ▼                          │
                           consumer ──ошибка, попытка<3──▶ [ payments.retry ]
